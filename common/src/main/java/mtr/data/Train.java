@@ -65,7 +65,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	public static final float MIN_ACCELERATION = 0.001F; // m/tick^2
 	public static final int DOOR_MOVE_TIME = 64;
 	protected static final int MAX_CHECK_DISTANCE = 32;
-	protected static final int DOOR_DELAY = 120;
+	protected static final int DOOR_DELAY = 20;
 
 	private static final String KEY_SPEED = "speed";
 	private static final String KEY_RAIL_PROGRESS = "rail_progress";
