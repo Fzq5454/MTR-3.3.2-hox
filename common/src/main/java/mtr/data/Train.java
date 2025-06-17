@@ -66,6 +66,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	public static final int DOOR_MOVE_TIME = 64;
 	protected static final int MAX_CHECK_DISTANCE = 32;
 	protected static final int DOOR_DELAY = 20;
+	protected static final int DEPARTURE_DELAY_AFTER_DOOR_CLOSE = 120;
 
 	private static final String KEY_SPEED = "speed";
 	private static final String KEY_RAIL_PROGRESS = "rail_progress";
@@ -474,6 +475,8 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						final boolean isOppositeRail = isOppositeRail();
 						final boolean railBlocked = isRailBlocked(getIndex(0, spacing, true) + (isOppositeRail ? 2 : 1));
 
+						final boolean doorsFullyClosed = doorValue == 0 && !doorTarget;
+					
 						if (totalDwellTicks == 0) {
 							tempDoorOpen = false;
 						} else {
@@ -485,6 +488,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 									railProgress = distances.get(repeatIndex1);
 								}
 							}
+						
 
 							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed || !railBlocked) {
 								elapsedDwellTicks += ticksElapsed;
@@ -492,10 +496,13 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 							tempDoorOpen = openDoors();
 						}
+	
+						final boolean delayAfterDoorClose = doorsFullyClosed && elapsedDwellTicks >= totalDwellTicks - DEPARTURE_DELAY_AFTER_DOOR_CLOSE;
 
-						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
-							startUp(world, trainCars, spacing, isOppositeRail);
-						}
+						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks || delayAfterDoorClose) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) 
+    					{
+        					startUp(world, trainCars, spacing, isOppositeRail);
+    					}
 					} else {
 						if (!world.isClientSide()) {
 							final int checkIndex = getIndex(0, spacing, true) + 1;
