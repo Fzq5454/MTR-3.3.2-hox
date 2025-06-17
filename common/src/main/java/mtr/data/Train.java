@@ -130,6 +130,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		speed = messagePackHelper.getFloat(KEY_SPEED);
 		railProgress = messagePackHelper.getDouble(KEY_RAIL_PROGRESS);
 		elapsedDwellTicks = messagePackHelper.getFloat(KEY_ELAPSED_DWELL_TICKS);
+		doorClosedTick = messagePackHelper.getFloat("door_closed_tick");
 		nextStoppingIndex = messagePackHelper.getInt(KEY_NEXT_STOPPING_INDEX);
 		nextPlatformIndex = messagePackHelper.getInt(KEY_NEXT_PLATFORM_INDEX);
 		reversed = messagePackHelper.getBoolean(KEY_REVERSED);
@@ -245,6 +246,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		isOnRoute = packet.readBoolean();
 		manualNotch = packet.readInt();
 		doorTarget = packet.readBoolean();
+		doorClosedTick = packet.readFloat();
 
 		final int ridingEntitiesCount = packet.readInt();
 		for (int i = 0; i < ridingEntitiesCount; i++) {
@@ -268,6 +270,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		messagePacker.packString(KEY_TRAIN_TYPE).packString(baseTrainType);
 		messagePacker.packString(KEY_IS_CURRENTLY_MANUAL).packBoolean(isCurrentlyManual);
 		messagePacker.packString(KEY_IS_ON_ROUTE).packBoolean(isOnRoute);
+		messagePacker.packString("door_closed_tick").packFloat(doorClosedTick);
 
 		messagePacker.packString(KEY_RIDING_ENTITIES).packArrayHeader(ridingEntities.size());
 		for (final UUID uuid : ridingEntities) {
@@ -332,6 +335,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		packet.writeBoolean(isOnRoute);
 		packet.writeInt(manualNotch);
 		packet.writeBoolean(doorTarget);
+		packet.writeFloat(doorClosedTick);
 		packet.writeInt(ridingEntities.size());
 		ridingEntities.forEach(packet::writeUUID);
 	}
@@ -455,7 +459,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				tempDoorValue = 0;
 				speed = 0;
 				nextStoppingIndex = 0;
-
+				doorClosedTick = 0;
 				if (!isCurrentlyManual && canDeploy(depot) || isCurrentlyManual && manualNotch > 0) {
 					startUp(world, trainCars, spacing, isOppositeRail());
 				}
@@ -497,10 +501,23 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 							tempDoorOpen = openDoors();
 						}
 	
-						final boolean delayAfterDoorClose = doorsFullyClosed && elapsedDwellTicks >= totalDwellTicks - DEPARTURE_DELAY_AFTER_DOOR_CLOSE;
+						if (doorsFullyClosed && doorClosedTick == 0) {
+    						doorClosedTick = elapsedDwellTicks;
+						}	
+						if (doorTarget) {
+    						doorClosedTick = 0;
+						}
+						final boolean delayAfterDoorClose = doorClosedTick > 0 && 
+                                  (elapsedDwellTicks - doorClosedTick) >= DEPARTURE_DELAY_AFTER_DOOR_CLOSE;
 
-						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks || delayAfterDoorClose) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) 
-    					{
+						if (!world.isClientSide() && 
+   							 !railBlocked && 
+    						(isCurrentlyManual || 
+     						elapsedDwellTicks >= totalDwellTicks || 
+     						delayAfterDoorClose) && 
+    						(!isCurrentlyManual || manualNotch > 0)) 
+						{
+							doorClosedTick = 0;
         					startUp(world, trainCars, spacing, isOppositeRail);
     					}
 					} else {
@@ -618,6 +635,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	}
 
 	protected void startUp(Level world, int trainCars, int trainSpacing, boolean isOppositeRail) {
+		doorClosedTick = 0; 
 		doorTarget = false;
 		doorValue = 0;
 		nextPlatformIndex = nextStoppingIndex;
