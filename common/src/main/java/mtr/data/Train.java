@@ -31,7 +31,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	protected double railProgress;
 	protected boolean doorTarget;
 	protected float doorValue;
-	protected float elapsedDwellTicks;
+	protected float elapsedDwellTicks = -60;
 	protected int nextStoppingIndex;
 	protected int nextPlatformIndex;
 	protected boolean reversed;
