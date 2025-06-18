@@ -31,7 +31,6 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	protected double railProgress;
 	protected boolean doorTarget;
 	protected float doorValue;
-	protected float elapsedDwellTicks = -60;
 	protected int nextStoppingIndex;
 	protected int nextPlatformIndex;
 	protected boolean reversed;
@@ -66,6 +65,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	public static final int DOOR_MOVE_TIME = 64;
 	protected static final int MAX_CHECK_DISTANCE = 32;
 	protected static final int DOOR_DELAY = 60;
+	protected float elapsedDwellTicks = DOOR_DELAY - (DOOR_DELAY * 2);
 
 	private static final String KEY_SPEED = "speed";
 	private static final String KEY_RAIL_PROGRESS = "rail_progress";
@@ -430,7 +430,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	}
 
 	public int getTotalDwellTicks() {
-		return path.get(nextStoppingIndex).dwellTime * 10 + 60 + 30; //+30=Do. open De. +60=Do. close De.
+		return path.get(nextStoppingIndex).dwellTime * 10 + 60 + 120; //+30=Do. open De. +120=Do. close De.
 	}
 
 	protected final void simulateTrain(Level world, float ticksElapsed, Depot depot) {
