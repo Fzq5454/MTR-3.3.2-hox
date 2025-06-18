@@ -65,7 +65,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	public static final float MIN_ACCELERATION = 0.001F; // m/tick^2
 	public static final int DOOR_MOVE_TIME = 64;
 	protected static final int MAX_CHECK_DISTANCE = 32;
-	protected static final int DOOR_DELAY = 20;
+	protected static final int DOOR_DELAY = 60;
 
 	private static final String KEY_SPEED = "speed";
 	private static final String KEY_RAIL_PROGRESS = "rail_progress";
@@ -430,7 +430,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	}
 
 	public int getTotalDwellTicks() {
-		return path.get(nextStoppingIndex).dwellTime * 10;
+		return path.get(nextStoppingIndex).dwellTime * 10 + 60 + 30; //+30=Do. open De. +60=Do. close De.
 	}
 
 	protected final void simulateTrain(Level world, float ticksElapsed, Depot depot) {
@@ -493,7 +493,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 							tempDoorOpen = openDoors();
 						}
 
-						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks + 120) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
+						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
 							startUp(world, trainCars, spacing, isOppositeRail);
 						}
 					} else {
