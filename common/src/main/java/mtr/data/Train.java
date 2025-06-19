@@ -486,7 +486,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 								}
 							}
 
-							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed + 120 || !railBlocked) {
+							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
 								elapsedDwellTicks += ticksElapsed;
 							}
 
