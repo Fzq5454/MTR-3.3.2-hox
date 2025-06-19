@@ -430,7 +430,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 	}
 
 	public int getTotalDwellTicks() {
-		return path.get(nextStoppingIndex).dwellTime * 10 + 60 + 120; //+30=Do. open De. +120=Do. close De.
+		return path.get(nextStoppingIndex).dwellTime * 10 + 60; //+60=Do. open De.
 	}
 
 	protected final void simulateTrain(Level world, float ticksElapsed, Depot depot) {
@@ -486,7 +486,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 								}
 							}
 
-							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed || !railBlocked) {
+							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed + 120 || !railBlocked) {
 								elapsedDwellTicks += ticksElapsed;
 							}
 
