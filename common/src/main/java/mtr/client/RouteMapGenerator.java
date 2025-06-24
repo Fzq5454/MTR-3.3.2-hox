@@ -329,7 +329,7 @@ public class RouteMapGenerator implements IGui {
 			final Platform platform = clientCache.platformIdMap.get(platformId);
 			if (platform != null) {
 				final int[] dimensionsPlatformNumber = new int[2];
-				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(route.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
 				drawString(nativeImage, pixelsPlatformNumber, circleX + tileSize / 2, padding + tileSize / 2, dimensionsPlatformNumber, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 			}
 
@@ -383,7 +383,8 @@ public class RouteMapGenerator implements IGui {
 							}
 						}
 					}
-
+					
+					final Route route = routeDetail.getA();
 					final int color = routeDetail.getA().color;
 					if (color != previousColor) {
 						colorIndex++;
