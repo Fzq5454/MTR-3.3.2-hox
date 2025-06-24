@@ -292,6 +292,12 @@ public class RouteMapGenerator implements IGui {
             final NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, width, height, false);
             nativeImage.fillRect(0, 0, width, height, invertColor(backgroundColor));
 
+            int leftPadding = 0;
+            int leftSize = 0;
+            int[] dimensionsDestination = new int[2];
+            int tilePadding = 0;
+            int rightSize = 0;
+
             if (isTerminating) {
                 //?
             } else {
@@ -323,21 +329,6 @@ public class RouteMapGenerator implements IGui {
             //for (int i = 0; i < colors.size(); i++) {
             //     drawResource(nativeImage, CIRCLE_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
             //}
-
-            final Platform platform = clientCache.platformIdMap.get(platformId);
-            if (platform != null) {
-                final int platformNumberX;
-                if (hasLeft) {
-                    platformNumberX = leftPadding + tileSize / 2; // 使用左箭头位置
-                } else if (hasRight) {
-                    platformNumberX = leftPadding + leftSize + dimensionsDestination[0] - tilePadding * 2 + rightSize - tileSize + tileSize / 2; // 使用右箭头位置
-                } else {
-                    platformNumberX = width / 2; // 居中使用
-                }
-                final int[] dimensionsPlatformNumber = new int[2];
-                final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
-                drawString(nativeImage, pixelsPlatformNumber, circleX + tileSize / 2, padding + tileSize / 2, dimensionsPlatformNumber, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
-            }
 
             if (transparentColor != 0) {
                 clearColor(nativeImage, invertColor(transparentColor));
