@@ -291,13 +291,7 @@ public class RouteMapGenerator implements IGui {
             final ClientCache clientCache = ClientData.DATA_CACHE;
             final NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, width, height, false);
             nativeImage.fillRect(0, 0, width, height, invertColor(backgroundColor));
-
-            int leftPadding = 0;
-            int leftSize = 0;
-            int[] dimensionsDestination = new int[2];
-            int tilePadding = 0;
-            int rightSize = 0;
-
+            
             if (isTerminating) {
                 //?
             } else {
