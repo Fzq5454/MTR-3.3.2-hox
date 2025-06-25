@@ -294,7 +294,7 @@ public class RouteMapGenerator implements IGui {
 
 			final int circleX;
 			if (isTerminating) {
-				//circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
+				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
