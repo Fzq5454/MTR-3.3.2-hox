@@ -294,7 +294,7 @@ public class RouteMapGenerator implements IGui {
 
 			final int circleX;
 			if (isTerminating) {
-				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
+				//circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
@@ -328,8 +328,17 @@ public class RouteMapGenerator implements IGui {
 
 			final Platform platform = clientCache.platformIdMap.get(platformId);
 			if (platform != null) {
+				Route routeForPlatform = null;
+    			for (Route route : ClientData.ROUTES) {
+        			if (route.containsPlatformId(platformId) && !route.isHidden) {
+            			routeForPlatform = route;
+            			break;
+        			}
+    			}
+    			String routeName = routeForPlatform != null ? routeForPlatform.name : "";
+
 				final int[] dimensionsPlatformNumber = new int[2];
-				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(routeName, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
 				drawString(nativeImage, pixelsPlatformNumber, circleX + tileSize / 2, padding + tileSize / 2, dimensionsPlatformNumber, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 			}
 
