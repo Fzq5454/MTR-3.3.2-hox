@@ -325,20 +325,11 @@ public class RouteMapGenerator implements IGui {
 			for (int i = 0; i < colors.size(); i++) {
 				drawResource(nativeImage, CIRCLE_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
 			}
-
+			/*
 			final Platform platform = clientCache.platformIdMap.get(platformId);
-			/*if (platform != null) {
-				Route routeForPlatform = null;
-    			for (Route route : ClientData.ROUTES) {
-        			if (route.containsPlatformId(platformId) && !route.isHidden) {
-            			routeForPlatform = route;
-            			break;
-        			}
-    			}
-    			String routeName = routeForPlatform != null ? routeForPlatform.name : "";
-
+			if (platform != null) {
 				final int[] dimensionsPlatformNumber = new int[2];
-				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(routeName, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
 				drawString(nativeImage, pixelsPlatformNumber, circleX + tileSize / 2, padding + tileSize / 2, dimensionsPlatformNumber, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 			}
 			*/
@@ -393,8 +384,7 @@ public class RouteMapGenerator implements IGui {
 							}
 						}
 					}
-					
-					final Route route = routeDetail.getA();
+
 					final int color = routeDetail.getA().color;
 					if (color != previousColor) {
 						colorIndex++;
@@ -522,7 +512,7 @@ public class RouteMapGenerator implements IGui {
 					final Station station = clientCache.stationIdMap.get(stationId);
 					final int[] dimensions = new int[2];
 					final byte[] pixels = clientCache.getTextPixels(station == null ? "" : station.name, dimensions, maxStringWidth, (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER), fontSizeBig, fontSizeSmall, fontSizeSmall / 4, vertical ? HorizontalAlignment.RIGHT : HorizontalAlignment.CENTER);
-					drawString(nativeImage, pixels, x, y + (textBelow ? lines * lineSpacing : -1) + (textBelow ? 1 : -1) * lineSize * 5 / 4, dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.TOP : VerticalAlignment.BOTTOM, currentStation ? 0 : 0, passed ? ARGB_LIGHT_GRAY : currentStation ? 0xFF00008B : ARGB_BLACK, vertical);
+					drawString(nativeImage, pixels, x, y + (textBelow ? lines * lineSpacing : -1) + (textBelow ? 1 : -1) * lineSize * 5 / 4, dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.TOP : VerticalAlignment.BOTTOM, currentStation ? 0 : 0, passed ? ARGB_LIGHT_GRAY : currentStation ? 0x000080 : ARGB_BLACK, vertical);
 				}));
 
 				if (transparentWhite) {
@@ -665,15 +655,11 @@ public class RouteMapGenerator implements IGui {
 
 		if (xChangeAbs > yChangeAbs) {
 			final boolean y1OffsetGreater = Math.abs(y1 - yOffset * scale) > Math.abs(y2 - yOffset * scale);
-			final int yd1 = Math.round(stationPosition1.y * scale * heightScale);
-			final int yt1 = Math.round(stationPosition2.y * scale * heightScale);
-			drawLine(nativeImage, x1, yd1, x2, yt1, yChangeAbs, color);
+			drawLine(nativeImage, x1, y1, x2 - x1, y1OffsetGreater ? 0 : y2 - y1, y1OffsetGreater ? changeDifference : yChangeAbs, color);
 			drawLine(nativeImage, x2, y2, x1 - x2, y1OffsetGreater ? y1 - y2 : 0, y1OffsetGreater ? yChangeAbs : changeDifference, color);
 		} else {
 			final int halfXChangeAbs = xChangeAbs / 2;
-			final int yd2 = Math.round(stationPosition1.y * scale * heightScale);
-			final int yt2 = Math.round(stationPosition2.y * scale * heightScale);
-			drawLine(nativeImage, x1, yt2, x2, yt2, halfXChangeAbs, color);
+			drawLine(nativeImage, x1, y1, x2 - x1, y2 - y1, halfXChangeAbs, color);
 			drawLine(nativeImage, x2, y2, x1 - x2, y1 - y2, halfXChangeAbs, color);
 			drawLine(nativeImage, (x1 + x2) / 2, y1 + (int) Math.copySign(halfXChangeAbs, y2 - y1), 0, y2 - y1, changeDifference, color);
 		}
