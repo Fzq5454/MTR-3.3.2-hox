@@ -298,18 +298,18 @@ public class RouteMapGenerator implements IGui {
 				String terminalText = IGui.insertTranslation("gui.mtr.terminal_station_cjk","gui.mtr.terminal_station", 1, "");
 				final int[] textDimensions = new int[2];
 				final byte[] textPixels = clientCache.getTextPixels(terminalText, textDimensions, 60, 20, tileSize * 3 / 5, tileSize * 3 / 10, 2, HorizontalAlignment.CENTER);
-				int textX = terminalX - textDimensions[0] / 2;
-    			int textY = terminalY - textDimensions[1] / 2;
+				//int textX = x - textDimensions[0] / 2;
+    			//int textY = y - textDimensions[1] / 2;
     			drawString(
         			nativeImage, 
         			textPixels, 
-        			textX, 
-        			textY, 
+        			circleX, 
+        			0,
         			textDimensions, 
         			HorizontalAlignment.CENTER,
-        			VerticalAlignment.MIDDLE,
+        			VerticalAlignment.CENTER,
         			0, 
-        			ARGB_RED,
+        			0xFF000000,
         			false
     			);
 			} else {
