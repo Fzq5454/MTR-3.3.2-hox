@@ -519,8 +519,10 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-							speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
-							manualNotch = -3;
+							if(!isCurrentlyManual) {
+								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
+								manualNotch = -3;
+							}
 						} else {
 							if (isCurrentlyManual) {
 								if (manualNotch >= -2) {
