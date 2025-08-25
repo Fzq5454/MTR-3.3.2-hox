@@ -548,9 +548,11 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 					railProgress += speed * ticksElapsed;
 					if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-						railProgress = distances.get(nextStoppingIndex);
-						speed = 0;
-						manualNotch = -2;
+						if (!isCurrentlyManual){
+							railProgress = distances.get(nextStoppingIndex);
+							speed = 0;
+							manualNotch = -2;
+						}
 					}
 
 					tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
