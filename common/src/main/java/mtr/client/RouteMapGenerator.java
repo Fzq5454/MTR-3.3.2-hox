@@ -295,23 +295,6 @@ public class RouteMapGenerator implements IGui {
 			final int circleX;
 			if (isTerminating) {
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
-				String terminalText = IGui.insertTranslation("gui.mtr.terminal_station_cjk","gui.mtr.terminal_station", 1, "");
-				final int[] textDimensions = new int[2];
-				final byte[] textPixels = clientCache.getTextPixels(terminalText, textDimensions, 60, 20, tileSize * 3 / 5, tileSize * 3 / 10, 2, HorizontalAlignment.CENTER);
-				//int textX = x - textDimensions[0] / 2;
-    			//int textY = y - textDimensions[1] / 2;
-    			drawString(
-        			nativeImage, 
-        			textPixels, 
-        			circleX, 
-        			0,
-        			textDimensions, 
-        			HorizontalAlignment.CENTER,
-        			VerticalAlignment.CENTER,
-        			0, 
-        			0xFF000000,
-        			false
-    			);
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
@@ -520,8 +503,7 @@ public class RouteMapGenerator implements IGui {
 						}
 
 						final int[] dimensions = new int[2];
-						String transferText = IGui.insertTranslation("gui.mtr.transfer_to_cjk", "gui.mtr.transfer_to", 1, IGui.mergeStations(stationPositionGrouped.interchangeNames));
-						final byte[] pixels = clientCache.getTextPixels(transferText, dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
+						final byte[] pixels = clientCache.getTextPixels(IGui.mergeStations(stationPositionGrouped.interchangeNames), dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
 						drawString(nativeImage, pixels, x, y + (textBelow ? -1 - lineHeight : lines * lineSpacing + lineHeight), dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.BOTTOM : VerticalAlignment.TOP, 0, passed ? ARGB_LIGHT_GRAY : ARGB_BLACK, vertical);
 					}
 
