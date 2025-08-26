@@ -523,7 +523,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 							}
 						}
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-						protected boolean isEndStation = nextStoppingIndex >= totalStations;
+						boolean isEndStation = nextStoppingIndex >= totalStations;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
 							if (!isCurrentlyManual || isEndStation) {
 								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
