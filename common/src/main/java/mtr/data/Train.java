@@ -447,6 +447,12 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		}
 
 		try {
+			int totalStations = 0;
+        	for (PathData pathData : path) {
+            	if (pathData.dwellTime > 0) {
+                	totalStations++;
+            	}
+        	}
 			if (nextStoppingIndex >= path.size()) {
 				return;
 			}
@@ -458,7 +464,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			if (!isOnRoute) {
 				railProgress = (railLength + trainCars * spacing) / 2;
 				reversed = false;
-				tempDoorOpen = false;
+				tempDoorOpen = false; 
 				tempDoorValue = 0;
 				speed = 0;
 				nextStoppingIndex = 0;
@@ -516,14 +522,14 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 								}
 							}
 						}
-
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
+						protected boolean isEndStation = nextStoppingIndex >= totalStations;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-							if (!isCurrentlyManual) {
+							if (!isCurrentlyManual || isEndStation) {
 								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
 								manualNotch = -3;
 							}
-							if (isCurrentlyManual) {
+							if (isCurrentlyManual && !isEndStation) {
 								if (manualNotch >= -2) {
 									final RailType railType = convertMaxManualSpeed(maxManualSpeed);
 									speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
