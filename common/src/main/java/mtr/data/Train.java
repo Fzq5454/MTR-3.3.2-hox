@@ -465,8 +465,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			if (nextStoppingIndex >= path.size()) {
 				return;
 			}
-			
-
+		
 			boolean isEndStation = !isRepeat() && nextStoppingIndex == getLastStationIndex();
 
 			final boolean tempDoorOpen;
