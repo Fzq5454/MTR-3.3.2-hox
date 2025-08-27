@@ -447,12 +447,6 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		}
 
 		try {
-			int totalStations = 0;
-        	for (PathData pathData : path) {
-            	if (pathData.dwellTime > 0) {
-                	totalStations++;
-            	}
-        	}
 			if (nextStoppingIndex >= path.size()) {
 				return;
 			}
@@ -523,7 +517,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 							}
 						}
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-						boolean isEndStation = nextStoppingIndex >= totalStations;
+						boolean isEndStation = nextStoppingIndex >= path.size;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
 							if (!isCurrentlyManual || isEndStation) {
 								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
@@ -560,7 +554,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 					railProgress += speed * ticksElapsed;
 					if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-						if (!isCurrentlyManual){
+						if (!isCurrentlyManual && isEndStation){
 							railProgress = distances.get(nextStoppingIndex);
 							speed = 0;
 							manualNotch = -2;
