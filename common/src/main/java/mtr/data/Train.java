@@ -441,6 +441,21 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		return path.get(nextStoppingIndex).dwellTime * 10 + 60; //+60=Do. open De.
 	}
 
+	private int lastStationIndex = -1;
+
+	private int getLastStationIndex() {
+        if (lastStationIndex == -1) {
+            lastStationIndex = -2;
+            for (int i = path.size() - 1; i >= 0; i--) {
+                if (path.get(i).dwellTime > 0) {
+                    lastStationIndex = i;
+                    break;
+                }
+            }
+        }
+       	return lastStationIndex;
+    }
+
 	protected final void simulateTrain(Level world, float ticksElapsed, Depot depot) {
 		if (world == null) {
 			return;
@@ -450,6 +465,9 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			if (nextStoppingIndex >= path.size()) {
 				return;
 			}
+			
+
+			boolean isEndStation = !isRepeat() && nextStoppingIndex == getLastStationIndex();
 
 			final boolean tempDoorOpen;
 			final float tempDoorValue;
@@ -517,7 +535,6 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 							}
 						}
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-						boolean isEndStation = nextStoppingIndex >= path.size;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
 							if (!isCurrentlyManual || isEndStation) {
 								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
