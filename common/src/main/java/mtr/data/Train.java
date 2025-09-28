@@ -1,4 +1,4 @@
-\\\package mtr.data;
+package mtr.data;
 
 import mtr.Items;
 import mtr.Keys;
