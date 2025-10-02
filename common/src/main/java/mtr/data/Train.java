@@ -441,29 +441,6 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 		return path.get(nextStoppingIndex).dwellTime * 10 + 60; //+60=Do. open De.
 	}
 
-	public RailType getNextStationRailType() {
-    	if (path == null || path.isEmpty() || nextStoppingIndex < 0 || nextStoppingIndex >= path.size()) {
-        	return RailType.NONE;
-    	}
-    
-    	PathData nextStationPath = path.get(nextStoppingIndex);
-    	if (nextStationPath == null || nextStationPath.rail == null) {
-        	return RailType.NONE;
-    	}
-    
-    	return nextStationPath.rail.railType;
-	}
-
-	public boolean isDestStationRailType(RailType railType) {
-    	return railType == RailType.SIDING || 
-           	   railType == RailType.TURN_BACK;
-	}
-
-	public boolean isNextStationDestStation() {
-    	RailType nextRailType = getNextStationRailType();
-    	return isDestStationRailType(nextRailType);
-	}
-	
 	protected final void simulateTrain(Level world, float ticksElapsed, Depot depot) {
 		if (world == null) {
 			return;
@@ -542,7 +519,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
 						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-							if (!isCurrentlyManual || isNextStationDestStation()) {
+							if (!isCurrentlyManual) {
 								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
 								manualNotch = -3;
 							}
@@ -577,7 +554,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 					railProgress += speed * ticksElapsed;
 					if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-						if (!isCurrentlyManual || isNextStationDestStation()){
+						if (!isCurrentlyManual){
 							railProgress = distances.get(nextStoppingIndex);
 							speed = 0;
 							manualNotch = -2;
