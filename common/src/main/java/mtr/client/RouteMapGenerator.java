@@ -267,7 +267,7 @@ public class RouteMapGenerator implements IGui {
 
 		return null;
 	}
-
+	public static NativeImage generateDirectionArrow(long platformId, boolean hasLeft, boolean hasRight, HorizontalAlignment horizontalAlignment, boolean showToString, float paddingScale, float aspectRatio, int backgroundColor, int textColor, int transparentColor) {
 		if (aspectRatio <= 0) {
 			return null;
 		}
