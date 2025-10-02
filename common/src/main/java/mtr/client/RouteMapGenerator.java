@@ -268,7 +268,6 @@ public class RouteMapGenerator implements IGui {
 		return null;
 	}
 
-	public static NativeImage generateDirectionArrow(long platformId, boolean hasLeft, boolean hasRight, HorizontalAlignment horizontalAlignment, boolean showToString, float paddingScale, float aspectRatio, int backgroundColor, int textColor, int transparentColor) {
 		if (aspectRatio <= 0) {
 			return null;
 		}
@@ -298,8 +297,10 @@ public class RouteMapGenerator implements IGui {
 				final String terminalSet = IGui.insertTranslation("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station", 0, "");
 				final int[] dimensionsTer = new int[2];
 				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, 0, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
-				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, backgroundColor, textColor, false);
+				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, 0x000000, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
+				System.out.println("Ter:" + terminalSet);
+				
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
