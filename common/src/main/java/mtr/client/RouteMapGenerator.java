@@ -296,7 +296,7 @@ public class RouteMapGenerator implements IGui {
 				final int tilePadding = tileSize / 4;
 				final String terminalSet = IGui.insertTranslation("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station", 0, "");
 				final int[] dimensionsTer = new int[2];
-				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, 0, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
+				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, 999, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
 				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, 0x000000, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 				System.out.println("Ter:" + terminalSet);
