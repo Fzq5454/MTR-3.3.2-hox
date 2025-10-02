@@ -294,6 +294,11 @@ public class RouteMapGenerator implements IGui {
 
 			final int circleX;
 			if (isTerminating) {
+				final int tilePadding = tileSize / 4;
+				final String terminalSet = IGui.insertTranslation("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station", 0, "");
+				final int[] dimensionsTer = new int[2];
+				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, 0, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
+				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
@@ -503,7 +508,8 @@ public class RouteMapGenerator implements IGui {
 						}
 
 						final int[] dimensions = new int[2];
-						final byte[] pixels = clientCache.getTextPixels(IGui.mergeStations(stationPositionGrouped.interchangeNames), dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
+						final String changeFor = IGui.mergeStations(IGui.insertTranslation("gui.mtr.transfer_to_cjk", "gui.mtr.transfer_to", 1, stationPositionGrouped.interchangeNames));
+						final byte[] pixels = clientCache.getTextPixels(changeFor, dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
 						drawString(nativeImage, pixels, x, y + (textBelow ? -1 - lineHeight : lines * lineSpacing + lineHeight), dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.BOTTOM : VerticalAlignment.TOP, 0, passed ? ARGB_LIGHT_GRAY : ARGB_BLACK, vertical);
 					}
 
