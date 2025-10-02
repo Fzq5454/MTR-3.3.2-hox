@@ -508,7 +508,7 @@ public class RouteMapGenerator implements IGui {
 						}
 
 						final int[] dimensions = new int[2];
-						final String changeFor = IGui.mergeStations(IGui.insertTranslation("gui.mtr.transfer_to_cjk", "gui.mtr.transfer_to", 1, stationPositionGrouped.interchangeNames));
+						final String changeFor = IGui.insertTranslation("gui.mtr.transfer_to_cjk", "gui.mtr.transfer_to", 1, IGui.mergeStations(stationPositionGrouped.interchangeNames));
 						final byte[] pixels = clientCache.getTextPixels(changeFor, dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
 						drawString(nativeImage, pixels, x, y + (textBelow ? -1 - lineHeight : lines * lineSpacing + lineHeight), dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.BOTTOM : VerticalAlignment.TOP, 0, passed ? ARGB_LIGHT_GRAY : ARGB_BLACK, vertical);
 					}
