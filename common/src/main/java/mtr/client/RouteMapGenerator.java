@@ -29,7 +29,9 @@ public class RouteMapGenerator implements IGui {
 	private static final String LOGO_RESOURCE = "textures/block/sign/logo.png";
 	private static final String EXIT_RESOURCE = "textures/block/sign/exit_letter_blank.png";
 	private static final String ARROW_RESOURCE = "textures/block/sign/arrow.png";
-	private static final String CIRCLE_RESOURCE = "textures/block/sign/circleP.png";
+	private static final String CIRCLE_RESOURCE = "textures/block/sign/circle.png";
+	//TODO test for
+	//private static final String CIRCLEP_RESOURCE = "textures/block/sign/circleP.png";
 	private static final String TEMP_CIRCULAR_MARKER = "temp_circular_marker";
 	private static final int PIXEL_RESOLUTION = 24;
 
@@ -295,14 +297,20 @@ public class RouteMapGenerator implements IGui {
 			if (isTerminating) {
 				final int maxWidth = width - padding * 2;
 				final int tilePadding = tileSize / 4;
-				final String UK = ""; 
 				final String terminalSet = IGui.getBothTranslations("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station");
 				final int[] dimensionsTer = new int[2];
 				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, maxWidth, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
-				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
+				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, leftToRight ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
-				//System.out.println("Ter:" + terminalSet);
-				
+				for (int i = 0; i < colors.size(); i++) {
+					drawResource(nativeImage, CIRCLE_RESOURCE, width / 2, height / 2, tileSize, tileSize, leftToRight, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
+				}
+				final Platform platform = clientCache.platformIdMap.get(platformId);
+				if (platform != null) {
+					final int[] dimensionsPlatformNumber = new int[2];
+					final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+					drawString(nativeImage, pixelsPlatformNumber, width / 2, height / 2, dimensionsPlatformNumber, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
+				}
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
@@ -318,7 +326,6 @@ public class RouteMapGenerator implements IGui {
 				final byte[] pixelsDestination = clientCache.getTextPixels(destinationString, dimensionsDestination, width - leftSize - rightSize - padding * (showToString ? 2 : 1), (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT);
 				final int leftPadding = (int) horizontalAlignment.getOffset(0, leftSize + rightSize + dimensionsDestination[0] - tilePadding * 2 - width);
 				drawString(nativeImage, pixelsDestination, leftPadding + leftSize - tilePadding, height / 2, dimensionsDestination, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
-
 				if (hasLeft) {
 					drawResource(nativeImage, ARROW_RESOURCE, leftPadding, padding, tileSize, tileSize, false, 0, 1, textColor, false);
 				}
@@ -327,20 +334,25 @@ public class RouteMapGenerator implements IGui {
 				}
 
 				circleX = leftPadding + leftSize + (leftToRight ? -tileSize - tilePadding : dimensionsDestination[0] - tilePadding);
-			}
 
-			for (int i = 0; i < colors.size(); i++) {
-				drawResource(nativeImage, CIRCLE_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
+				if (!hasLeft && !hasRight) {
+					for (int i = 0; i < colors.size(); i++) {
+						drawResource(nativeImage, CIRCLE_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
+					}
+
+					final Platform platformNub = clientCache.platformIdMap.get(platformId);
+					if (platformNub != null) {
+						final int[] dimensionsPlatformNumberSe = new int[2];
+						final byte[] pixelsPlatformNumberSe = clientCache.getTextPixels(platformNub.name, dimensionsPlatformNumberSe, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+						drawString(nativeImage, pixelsPlatformNumberSe, width / 2, height / 2, dimensionsPlatformNumberSe, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
+					}
+				}
 			}
 			/*
-			final Platform platform = clientCache.platformIdMap.get(platformId);
-			if (platform != null) {
-				final int[] dimensionsPlatformNumber = new int[2];
-				final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
-				drawString(nativeImage, pixelsPlatformNumber, circleX + tileSize / 2, padding + tileSize / 2, dimensionsPlatformNumber, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
+			for (int i = 0; i < colors.size(); i++) {
+				drawResource(nativeImage, CIRCLEP_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
 			}
 			*/
-
 			if (transparentColor != 0) {
 				clearColor(nativeImage, invertColor(transparentColor));
 			}
