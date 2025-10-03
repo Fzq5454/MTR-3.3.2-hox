@@ -13,6 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -59,7 +60,6 @@ public class RouteMapGenerator implements IGui {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return null;
 	}
 
@@ -269,6 +269,7 @@ public class RouteMapGenerator implements IGui {
 
 		return null;
 	}
+
 	public static NativeImage generateDirectionArrow(long platformId, boolean hasLeft, boolean hasRight, HorizontalAlignment horizontalAlignment, boolean showToString, float paddingScale, float aspectRatio, int backgroundColor, int textColor, int transparentColor) {
 		if (aspectRatio <= 0) {
 			return null;
@@ -310,13 +311,22 @@ public class RouteMapGenerator implements IGui {
 					destinationString = IGui.insertTranslation("gui.mtr.to_cjk", "gui.mtr.to", 1, destinationString);
 				}
 				final int tilePadding = tileSize / 4;
-				final int leftSize = ((hasLeft ? 1 : 0) + (leftToRight ? 1 : 0)) * (tileSize + tilePadding);
-				final int rightSize = ((hasRight ? 1 : 0) + (leftToRight ? 0 : 1)) * (tileSize + tilePadding);
 
+				int leftSize;
+				int rightSize;
+
+				if (hasLeft || hasRight) {
+					leftSize = (hasLeft ? 1 : 0) * (tileSize + tilePadding);
+					rightSize = (hasRight ? 1 : 0) * (tileSize + tilePadding);
+				} else {
+					leftSize = ((hasLeft ? 1 : 0) + (leftToRight ? 1 : 0)) * (tileSize + tilePadding);
+					rightSize = ((hasRight ? 1 : 0) + (leftToRight ? 0 : 1)) * (tileSize + tilePadding);
+				}
 				final int[] dimensionsDestination = new int[2];
 				final byte[] pixelsDestination = clientCache.getTextPixels(destinationString, dimensionsDestination, width - leftSize - rightSize - padding * (showToString ? 2 : 1), (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT);
 				final int leftPadding = (int) horizontalAlignment.getOffset(0, leftSize + rightSize + dimensionsDestination[0] - tilePadding * 2 - width);
 				drawString(nativeImage, pixelsDestination, leftPadding + leftSize - tilePadding, height / 2, dimensionsDestination, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
+				
 				if (hasLeft) {
 					drawResource(nativeImage, ARROW_RESOURCE, leftPadding, padding, tileSize, tileSize, false, 0, 1, textColor, false);
 				}
@@ -325,7 +335,7 @@ public class RouteMapGenerator implements IGui {
 				}
 
 				circleX = leftPadding + leftSize + (leftToRight ? -tileSize - tilePadding : dimensionsDestination[0] - tilePadding);
-
+			
 				if (!hasLeft && !hasRight) {
 					for (int i = 0; i < colors.size(); i++) {
 						drawResource(nativeImage, CIRCLE_RESOURCE, circleX, padding, tileSize, tileSize, false, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
@@ -600,7 +610,7 @@ public class RouteMapGenerator implements IGui {
 				}
 			}
 
-			if (!lastStation) {
+			if (!lastStation ) {
 				positionXOffset += intermediateSegmentsMaxCount;
 				for (int routeIndex = 0; routeIndex < routeCount; routeIndex++) {
 					final float stationY = getLineOffset(routeIndex, colorIndices);
@@ -622,20 +632,20 @@ public class RouteMapGenerator implements IGui {
 		final List<Integer> terminatingColors = new ArrayList<>();
 		ClientData.ROUTES.stream().filter(route -> route.containsPlatformId(platformId) && !route.isHidden).sorted((a, b) -> a.color == b.color ? a.compareTo(b) : a.color - b.color).forEach(route -> {
 			final int currentStationIndex = route.getPlatformIdIndex(platformId);
-			if (currentStationIndex < route.platformIds.size() - 1) {
-				nonTerminatingCallback.accept(route, currentStationIndex);
-				if (!colors.contains(route.color)) {
-					colors.add(route.color);
-				}
-			} else {
-				if (!terminatingColors.contains(route.color)) {
-					terminatingColors.add(route.color);
-				}
+			//if (currentStationIndex < route.platformIds.size() - 1) {
+			nonTerminatingCallback.accept(route, currentStationIndex);
+			if (!colors.contains(route.color)) {
+				colors.add(route.color);
 			}
+			// }else {
+			// 	if (!terminatingColors.contains(route.color)) {
+			// 		terminatingColors.add(route.color);
+			// 	}
+			// }
 		});
-		if (colors.isEmpty()) {
-			colors.addAll(terminatingColors);
-		}
+		// if (colors.isEmpty()) {
+		// 	colors.addAll(terminatingColors);
+		// }
 		return colors;
 	}
 
