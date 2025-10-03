@@ -335,7 +335,7 @@ public class RouteMapGenerator implements IGui {
 					if (platformNub != null) {
 						final int[] dimensionsPlatformNumberSe = new int[2];
 						final byte[] pixelsPlatformNumberSe = clientCache.getTextPixels(platformNub.name, dimensionsPlatformNumberSe, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
-						drawString(nativeImage, pixelsPlatformNumberSe, circleX + tileSize / 2, height / 2, dimensionsPlatformNumberSe, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
+						drawString(nativeImage, pixelsPlatformNumberSe, circleX + tileSize / 2, height / 2, dimensionsPlatformNumberSe, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 					}
 				}
 			}
