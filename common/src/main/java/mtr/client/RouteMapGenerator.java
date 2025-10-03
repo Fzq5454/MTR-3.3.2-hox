@@ -636,16 +636,15 @@ public class RouteMapGenerator implements IGui {
 			nonTerminatingCallback.accept(route, currentStationIndex);
 			if (!colors.contains(route.color)) {
 				colors.add(route.color);
+			}else {
+				if (!terminatingColors.contains(route.color)) {
+					terminatingColors.add(route.color);
+				}
 			}
-			// }else {
-			// 	if (!terminatingColors.contains(route.color)) {
-			// 		terminatingColors.add(route.color);
-			// 	}
-			// }
 		});
-		// if (colors.isEmpty()) {
-		// 	colors.addAll(terminatingColors);
-		// }
+		if (colors.isEmpty()) {
+			colors.addAll(terminatingColors);
+		}
 		return colors;
 	}
 
