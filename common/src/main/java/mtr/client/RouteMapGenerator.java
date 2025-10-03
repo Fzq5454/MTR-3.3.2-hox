@@ -300,17 +300,8 @@ public class RouteMapGenerator implements IGui {
 				final String terminalSet = IGui.getBothTranslations("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station");
 				final int[] dimensionsTer = new int[2];
 				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, maxWidth, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
-				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, leftToRight ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
+				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
-				for (int i = 0; i < colors.size(); i++) {
-					drawResource(nativeImage, CIRCLE_RESOURCE, width / 2, height / 2, tileSize, tileSize, leftToRight, (float) i / colors.size(), (i + 1F) / colors.size(), colors.get(i), false);
-				}
-				final Platform platform = clientCache.platformIdMap.get(platformId);
-				if (platform != null) {
-					final int[] dimensionsPlatformNumber = new int[2];
-					final byte[] pixelsPlatformNumber = clientCache.getTextPixels(platform.name, dimensionsPlatformNumber, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
-					drawString(nativeImage, pixelsPlatformNumber, width / 2, height / 2, dimensionsPlatformNumber, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
-				}
 			} else {
 				String destinationString = IGui.mergeStations(destinations);
 				final boolean noToString = destinationString.startsWith(TEMP_CIRCULAR_MARKER);
@@ -344,7 +335,7 @@ public class RouteMapGenerator implements IGui {
 					if (platformNub != null) {
 						final int[] dimensionsPlatformNumberSe = new int[2];
 						final byte[] pixelsPlatformNumberSe = clientCache.getTextPixels(platformNub.name, dimensionsPlatformNumberSe, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
-						drawString(nativeImage, pixelsPlatformNumberSe, width / 2, height / 2, dimensionsPlatformNumberSe, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
+						drawString(nativeImage, pixelsPlatformNumberSe, circleX + tileSize / 2, height / 2, dimensionsPlatformNumberSe, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 					}
 				}
 			}
