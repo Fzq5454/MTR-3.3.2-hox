@@ -296,10 +296,10 @@ public class RouteMapGenerator implements IGui {
 				final int maxWidth = width - padding * 2;
 				final int tilePadding = tileSize / 4;
 				final String UK = ""; 
-				final String terminalSet = IGui.insertTranslation("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station", 1, UK);
+				final String terminalSet = IGui.getBothTranslations("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station");
 				final int[] dimensionsTer = new int[2];
 				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, maxWidth, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER);
-				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, backgroundColor, textColor, false);
+				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 				//System.out.println("Ter:" + terminalSet);
 				
@@ -310,7 +310,6 @@ public class RouteMapGenerator implements IGui {
 				if (!destinationString.isEmpty() && showToString && !noToString) {
 					destinationString = IGui.insertTranslation("gui.mtr.to_cjk", "gui.mtr.to", 1, destinationString);
 				}
-
 				final int tilePadding = tileSize / 4;
 				final int leftSize = ((hasLeft ? 1 : 0) + (leftToRight ? 1 : 0)) * (tileSize + tilePadding);
 				final int rightSize = ((hasRight ? 1 : 0) + (leftToRight ? 0 : 1)) * (tileSize + tilePadding);
