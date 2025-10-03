@@ -72,6 +72,18 @@ public interface IGui {
 		return insertTranslation(keyCJK, key, null, expectedArguments, arguments);
 	}
 
+    static String getBothTranslations(String keyCJK, String key) {
+        String cjk = Text.translatable(keyCJK).getString();
+        String nonCjk = Text.translatable(key).getString();
+        return cjk + "|" + nonCjk;
+    }
+    
+    static String getBothTranslations(String keyCJK, String key, Object... args) {
+        String cjk = Text.translatable(keyCJK, args).getString();
+        String nonCjk = Text.translatable(key, args).getString();
+        return cjk + "|" + nonCjk;
+    }
+
 	static String insertTranslation(String keyCJK, String key, String overrideFirst, int expectedArguments, String... arguments) {
 		if (arguments.length < expectedArguments) {
 			return "";
