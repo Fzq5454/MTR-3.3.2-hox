@@ -278,7 +278,7 @@ public class RouteMapGenerator implements IGui {
 		try {
 			final List<String> destinations = new ArrayList<>();
 			final List<Integer> colors = getRouteStream(platformId, (route, currentStationIndex) -> destinations.add(ClientData.DATA_CACHE.getFormattedRouteDestination(route, currentStationIndex, TEMP_CIRCULAR_MARKER)));
-			final boolean isTerminating = destinations.isEmpty();
+			final boolean isTerminating = destinations.isEmpty() || destinations.size() == 1;
 
 			final boolean leftToRight = horizontalAlignment == HorizontalAlignment.CENTER ? hasLeft || !hasRight : horizontalAlignment != HorizontalAlignment.RIGHT;
 			final int height = scale;
