@@ -255,7 +255,7 @@ public class RouteMapGenerator implements IGui {
 		try {
 			final int padding = scale / 32;
 			final int[] dimensions = new int[2];
-			final byte[] pixels = ClientData.DATA_CACHE.getTextPixels(routeName, dimensions, Integer.MAX_VALUE, (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER), fontSizeBig, fontSizeSmall, padding, horizontalAlignment);
+			final byte[] pixels = ClientData.DATA_CACHE.getTextPixels(routeName, dimensions, Integer.MAX_VALUE, (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER), fontSizeBig, fontSizeSmall, padding, horizontalAlignment, fasle);
 
 			final int width = dimensions[0] + padding * 2;
 			final int height = dimensions[1] + padding * 2;
@@ -298,9 +298,9 @@ public class RouteMapGenerator implements IGui {
 			if (isTerminating) {
 				final int maxWidth = width - padding * 2;
 				final int tilePadding = tileSize / 4;
-				final String terminalSet = IGui.getBothTranslations("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station");
+				final String terminatingSet = IGui.getBothTranslations("gui.mtr.terminal_station_cjk", "gui.mtr.terminal_station");
 				final int[] dimensionsTer = new int[2];
-				final byte[] pixelsTer = clientCache.getTextPixels(terminalSet, dimensionsTer, maxWidth, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER, true);
+				final byte[] pixelsTer = clientCache.getTextPixels(terminatingSet, dimensionsTer, maxWidth, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, HorizontalAlignment.CENTER, true);
 				drawString(nativeImage, pixelsTer, width / 2, height / 2, dimensionsTer, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				circleX = (int) horizontalAlignment.getOffset(0, tileSize - width);
 			} else {
@@ -323,7 +323,7 @@ public class RouteMapGenerator implements IGui {
 					rightSize = ((hasRight ? 1 : 0) + (leftToRight ? 0 : 1)) * (tileSize + tilePadding);
 				}
 				final int[] dimensionsDestination = new int[2];
-				final byte[] pixelsDestination = clientCache.getTextPixels(destinationString, dimensionsDestination, width - leftSize - rightSize - padding * (showToString ? 2 : 1), (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT);
+				final byte[] pixelsDestination = clientCache.getTextPixels(destinationString, dimensionsDestination, width - leftSize - rightSize - padding * (showToString ? 2 : 1), (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER), tileSize * 3 / 5, tileSize * 3 / 10, tilePadding, leftToRight ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT, false);
 				final int leftPadding = (int) horizontalAlignment.getOffset(0, leftSize + rightSize + dimensionsDestination[0] - tilePadding * 2 - width);
 				drawString(nativeImage, pixelsDestination, leftPadding + leftSize - tilePadding, height / 2, dimensionsDestination, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, backgroundColor, textColor, false);
 				
@@ -344,7 +344,7 @@ public class RouteMapGenerator implements IGui {
 					final Platform platformNub = clientCache.platformIdMap.get(platformId);
 					if (platformNub != null) {
 						final int[] dimensionsPlatformNumberSe = new int[2];
-						final byte[] pixelsPlatformNumberSe = clientCache.getTextPixels(platformNub.name, dimensionsPlatformNumberSe, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER);
+						final byte[] pixelsPlatformNumberSe = clientCache.getTextPixels(platformNub.name, dimensionsPlatformNumberSe, tileSize, (int) (tileSize * ClientCache.LINE_HEIGHT_MULTIPLIER * 3 / 4), tileSize * 3 / 4, tileSize * 3 / 4, 0, HorizontalAlignment.CENTER, false);
 						drawString(nativeImage, pixelsPlatformNumberSe, circleX + tileSize / 2, height / 2, dimensionsPlatformNumberSe, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 0, ARGB_WHITE, false);
 					}
 				}
@@ -524,7 +524,7 @@ public class RouteMapGenerator implements IGui {
 
 						final int[] dimensions = new int[2];
 						final String changeFor = IGui.insertTranslation("gui.mtr.transfer_to_cjk", "gui.mtr.transfer_to", 1, IGui.mergeStations(stationPositionGrouped.interchangeNames));
-						final byte[] pixels = clientCache.getTextPixels(changeFor, dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER);
+						final byte[] pixels = clientCache.getTextPixels(changeFor, dimensions, maxStringWidth - (vertical ? lineHeight : 0), (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER / 2), fontSizeBig / 2, fontSizeSmall / 2, 0, vertical ? HorizontalAlignment.LEFT : HorizontalAlignment.CENTER, false);
 						drawString(nativeImage, pixels, x, y + (textBelow ? -1 - lineHeight : lines * lineSpacing + lineHeight), dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.BOTTOM : VerticalAlignment.TOP, 0, passed ? ARGB_LIGHT_GRAY : ARGB_BLACK, vertical);
 					}
 
@@ -532,7 +532,7 @@ public class RouteMapGenerator implements IGui {
 
 					final Station station = clientCache.stationIdMap.get(stationId);
 					final int[] dimensions = new int[2];
-					final byte[] pixels = clientCache.getTextPixels(station == null ? "" : station.name, dimensions, maxStringWidth, (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER), fontSizeBig, fontSizeSmall, fontSizeSmall / 4, vertical ? HorizontalAlignment.RIGHT : HorizontalAlignment.CENTER);
+					final byte[] pixels = clientCache.getTextPixels(station == null ? "" : station.name, dimensions, maxStringWidth, (int) ((fontSizeBig + fontSizeSmall) * ClientCache.LINE_HEIGHT_MULTIPLIER), fontSizeBig, fontSizeSmall, fontSizeSmall / 4, vertical ? HorizontalAlignment.RIGHT : HorizontalAlignment.CENTER, false);
 					drawString(nativeImage, pixels, x, y + (textBelow ? lines * lineSpacing : -1) + (textBelow ? 1 : -1) * lineSize * 5 / 4, dimensions, HorizontalAlignment.CENTER, textBelow ? VerticalAlignment.TOP : VerticalAlignment.BOTTOM, currentStation ? 0 : 0, passed ? ARGB_LIGHT_GRAY : currentStation ? 0x000080 : ARGB_BLACK, vertical);
 				}));
 
