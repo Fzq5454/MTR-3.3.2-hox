@@ -36,8 +36,8 @@ public class ClientCache extends DataCache implements IGui {
 	private Font font;
 	private Font fontCjk;
 
-	private Font terminalFont;
-	private Font terminalFontCjk;
+	private Font terminatingFont;
+	private Font terminatingFontCjk;
 
 	public final Map<Long, Map<Integer, ColorNameTuple>> stationIdToRoutes = new HashMap<>();
 
@@ -116,8 +116,8 @@ public class ClientCache extends DataCache implements IGui {
 		font = null;
 		fontCjk = null;
 
-		terminalFont = null;
-		terminalFontCjk = null;
+		terminatingFont = null;
+		terminatingFontCjk = null;
 		refreshDynamicResources();
 	}
 
@@ -291,7 +291,7 @@ public class ClientCache extends DataCache implements IGui {
 	}
 
 	public byte[] getTextPixels(String text, int[] dimensions, int fontSizeCjk, int fontSize) {
-		return getTextPixels(text, dimensions, Integer.MAX_VALUE, (int) (Math.max(fontSizeCjk, fontSize) * LINE_HEIGHT_MULTIPLIER), fontSizeCjk, fontSize, 0, null, null);
+		return getTextPixels(text, dimensions, Integer.MAX_VALUE, (int) (Math.max(fontSizeCjk, fontSize) * LINE_HEIGHT_MULTIPLIER), fontSizeCjk, fontSize, 0, null, false);
 	}
 
 	public byte[] getTextPixels(String text, int[] dimensions, int maxWidth, int maxHeight, int fontSizeCjk, int fontSize, int padding, IGui.HorizontalAlignment horizontalAlignment, boolean isTerminating) {
@@ -326,8 +326,8 @@ public class ClientCache extends DataCache implements IGui {
 			final Font fontSized = font.deriveFont(Font.PLAIN, newFontSize);
 			final Font fontCjkSized = fontCjk.deriveFont(Font.PLAIN, newFontSize);
 
-			final Font terminalFontSized = terminalFont.deriveFont(Font.PLAIN, newFontSize);
-			final Font terminalFontCjkSized = terminalFontCjk.deriveFont(Font.PLAIN, newFontSize);
+			final Font terminatingFontSized = terminatingFont.deriveFont(Font.PLAIN, newFontSize);
+			final Font terminatingFontCjkSized = terminatingFontCjk.deriveFont(Font.PLAIN, newFontSize);
 			
 			if (!isTerminating) {
 				for (int characterIndex = 0; characterIndex < textSplit[index].length(); characterIndex++) {
@@ -354,10 +354,10 @@ public class ClientCache extends DataCache implements IGui {
 				for (int characterIndex = 0; characterIndex < textSplit[index].length(); characterIndex++) {
 					final char character = textSplit[index].charAt(characterIndex);
 					final Font newFont;
-					if (terminalFontSized.canDisplay(character)) {
-						newFont = terminalFontSized;
-					} else if (terminalFontCjkSized.canDisplay(character)) {
-						newFont = terminalFontCjkSized;
+					if (terminatingFontSized.canDisplay(character)) {
+						newFont = terminatingFontSized;
+					} else if (terminatingFontCjkSized.canDisplay(character)) {
+						newFont = terminatingFontCjkSized;
 					} else {
 						Font defaultFont = null;
 						for (final Font testFont : GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()) {
@@ -437,13 +437,13 @@ public class ClientCache extends DataCache implements IGui {
 
 	private DynamicResource getResource(String key, Supplier<NativeImage> supplier, DefaultRenderingColor defaultRenderingColor) {
 		final Minecraft minecraftClient = Minecraft.getInstance();
-		if (font == null || fontCjk == null || terminalFont == null || terminalFontCjk == null) {
+		if (font == null || fontCjk == null || terminatingFont == null || terminatingFontCjk == null) {
 			final ResourceManager resourceManager = minecraftClient.getResourceManager();
 			try {
 				font = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/noto-sans-semibold.ttf"))));
 				fontCjk = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/noto-serif-cjk-tc-semibold.ttf"))));
-				terminalFont = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/sourceHanSans-Bold.ttf"))));
-				terminalFontCjk = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/sourceHanSans-cjk-Bold.ttf"))));
+				terminatingFont = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/sourceHanSans-Bold.ttf"))));
+				terminatingFontCjk = Font.createFont(Font.TRUETYPE_FONT, Utilities.getInputStream(resourceManager.getResource(new ResourceLocation(MTR.MOD_ID, "font/sourceHanSans-cjk-Bold.ttf"))));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
