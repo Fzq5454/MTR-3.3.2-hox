@@ -31,8 +31,6 @@ public class RouteMapGenerator implements IGui {
 	private static final String EXIT_RESOURCE = "textures/block/sign/exit_letter_blank.png";
 	private static final String ARROW_RESOURCE = "textures/block/sign/arrow.png";
 	private static final String CIRCLE_RESOURCE = "textures/block/sign/circle.png";
-	//TODO test for
-	//private static final String CIRCLEP_RESOURCE = "textures/block/sign/circleP.png";
 	private static final String TEMP_CIRCULAR_MARKER = "temp_circular_marker";
 	private static final int PIXEL_RESOLUTION = 24;
 
@@ -640,6 +638,10 @@ public class RouteMapGenerator implements IGui {
 					if (!terminatingColors.contains(route.color)) {
 						terminatingColors.add(route.color);
 					}
+				}
+			} else {
+				if (!terminatingColors.contains(route.color)) {
+					terminatingColors.add(route.color);
 				}
 			}
 		});
