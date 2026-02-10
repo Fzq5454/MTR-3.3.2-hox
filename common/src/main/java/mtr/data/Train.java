@@ -450,14 +450,14 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			boolean isNextEndOfRoute = false;
 
 			if (!isOnRoute) {
-				railProgress = (railLength + trainCars * spacing) / 2;
-				reversed = false;
 				tempDoorOpen = false;
 				tempDoorValue = 0;
-				speed = 0;
-				nextStoppingIndex = 0;
 
-				if (!isCurrentlyManual && canDeploy(depot) || isCurrentlyManual && manualNotch > 0) {
+				if (!isCurrentlyManual && canDeploy(depot)) {
+					railProgress = (railLength + trainCars * spacing) / 2;
+					reversed = false;
+					speed = 0;
+					nextStoppingIndex = 0;
 					startUp(world, trainCars, spacing, isOppositeRail());
 				}
 			} else {
@@ -477,23 +477,23 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						final boolean railBlocked = isRailBlocked(getIndex(0, spacing, true) + (isOppositeRail ? 2 : 1));
 
 						if (totalDwellTicks == 0) {
-							tempDoorOpen = false;
+					tempDoorOpen = false;
+				} else {
+					if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1 && railProgress < distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
+						if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
+							railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
+							reversed = !reversed;
 						} else {
-							if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1 && railProgress < distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
-							if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
-								railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
-								reversed = !reversed;
-							} else {
-								railProgress = distances.get(repeatIndex1);
-							}
+							railProgress = distances.get(repeatIndex1);
 						}
+					}
 
-							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
-								elapsedDwellTicks += ticksElapsed;
-							}
+					if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
+						elapsedDwellTicks += ticksElapsed;
+					}
 
-							tempDoorOpen = openDoors();
-						}
+					tempDoorOpen = openDoors();
+				}
 
 						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
 					startUp(world, trainCars, spacing, isOppositeRail);
