@@ -518,36 +518,46 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						}
 
 						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-						if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-							if (!isCurrentlyManual) {
-								speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
-								manualNotch = -3;
-							}
-							if (isCurrentlyManual) {
-								if (manualNotch >= -2) {
-									final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-									speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-								}
-							}
-						} else {
-							if (isCurrentlyManual) {
-								if (manualNotch >= -2) {
-									final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-									speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-								}
-							} else {
-								final float railSpeed = getRailSpeed(getIndex(0, spacing, false));
-								if (speed < railSpeed) {
-									speed = Math.min(speed + newAcceleration, railSpeed);
-									manualNotch = 2;
-								} else if (speed > railSpeed) {
-									speed = Math.max(speed - newAcceleration, railSpeed);
-									manualNotch = -2;
-								} else {
-									manualNotch = 0;
-								}
-							}
+				// Check if the next segment is turn-back rail, siding, or no rail ahead
+				final int currentIndex = getIndex(0, spacing, false);
+				final boolean isNextTurnBackOrSidingOrEnd = currentIndex + 1 >= path.size() || 
+					path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
+					path.get(currentIndex + 1).rail.railType == RailType.SIDING;
+
+				if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
+					if (!isCurrentlyManual) {
+						speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
+						manualNotch = -3;
+					}
+					if (isCurrentlyManual) {
+						if (manualNotch >= -2) {
+							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
 						}
+					}
+				} else if (!isCurrentlyManual && isNextTurnBackOrSidingOrEnd) {
+					// Force deceleration when next segment is turn-back rail, siding, or no rail ahead
+					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
+					manualNotch = -3;
+				} else {
+					if (isCurrentlyManual) {
+						if (manualNotch >= -2) {
+							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
+						}
+					} else {
+						final float railSpeed = getRailSpeed(getIndex(0, spacing, false));
+						if (speed < railSpeed) {
+							speed = Math.min(speed + newAcceleration, railSpeed);
+							manualNotch = 2;
+						} else if (speed > railSpeed) {
+							speed = Math.max(speed - newAcceleration, railSpeed);
+							manualNotch = -2;
+						} else {
+							manualNotch = 0;
+						}
+					}
+				}
 
 						tempDoorOpen = transportMode.continuousMovement && openDoors();
 					}
