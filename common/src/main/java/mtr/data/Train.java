@@ -512,44 +512,45 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
 				// Check if the next segment is turn-back rail, siding, or no rail ahead
 				final int currentIndex = getIndex(0, spacing, false);
-				final boolean isNextTurnBackOrSidingOrEnd = currentIndex + 1 >= path.size() || 
+				final boolean isNextEndOfRoute = currentIndex + 1 >= path.size() || 
 					path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
 					path.get(currentIndex + 1).rail.railType == RailType.SIDING;
 
 				// Debug information
 				if (currentIndex + 1 < path.size()) {
 					final RailType nextRailType = path.get(currentIndex + 1).rail.railType;
-					if (isNextTurnBackOrSidingOrEnd) {
+					if (isNextEndOfRoute) {
 						System.out.println("[Train Debug] Detected special segment ahead: " + nextRailType.name() + ", current speed: " + speed + ", current index: " + currentIndex);
 					}
 				} else if (currentIndex + 1 >= path.size()) {
 					System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
 				}
 
-				if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
+				// First check for special segments
+				if (isNextEndOfRoute) {
+					// Force deceleration for special segments regardless of manual mode
+					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
+					manualNotch = -3;
+					System.out.println("[Train Debug] Special segment deceleration activated, new speed: " + speed + ", acceleration: " + (newAcceleration * 2));
+				} else if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
+					// Normal deceleration for stations
 					if (!isCurrentlyManual) {
 						speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
 						manualNotch = -3;
 						System.out.println("[Train Debug] Normal deceleration activated, new speed: " + speed + ", stopping distance: " + stoppingDistance);
+					} else if (isCurrentlyManual && manualNotch >= -2) {
+						// Manual mode control for stations
+						final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+						speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
 					}
-					if (isCurrentlyManual) {
-						if (manualNotch >= -2) {
-							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-						}
-					}
-				} else if (!isCurrentlyManual && isNextTurnBackOrSidingOrEnd) {
-					// Force deceleration when next segment is turn-back rail, siding, or no rail ahead
-					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
-					manualNotch = -3;
-					System.out.println("[Train Debug] Special segment deceleration activated, new speed: " + speed + ", acceleration: " + (newAcceleration * 2));
 				} else {
-					if (isCurrentlyManual) {
-						if (manualNotch >= -2) {
-							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-						}
-					} else {
+					// Regular speed control
+					if (isCurrentlyManual && manualNotch >= -2) {
+						// Manual mode control
+						final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+						speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
+					} else if (!isCurrentlyManual) {
+						// Automatic mode speed control
 						final float railSpeed = getRailSpeed(getIndex(0, spacing, false));
 						if (speed < railSpeed) {
 							speed = Math.min(speed + newAcceleration, railSpeed);
@@ -571,7 +572,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 
 			railProgress += speed * ticksElapsed;
 			if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-				if (!isCurrentlyManual){
+				if (!isCurrentlyManual || isNextEndOfRoute){
 					railProgress = distances.get(nextStoppingIndex);
 					speed = 0;
 					manualNotch = -2;
