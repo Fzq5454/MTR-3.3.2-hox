@@ -446,6 +446,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			final boolean tempDoorOpen;
 			final float tempDoorValue;
 			final int totalDwellTicks = getTotalDwellTicks();
+			final boolean isNextEndOfRoute;
 
 			if (!isOnRoute) {
 				railProgress = (railLength + trainCars * spacing) / 2;
@@ -510,13 +511,11 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				}
 
 				final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-				// Check if the next segment is turn-back rail, siding, or no rail ahead
 				final int currentIndex = getIndex(0, spacing, false);
-				final boolean isNextEndOfRoute = currentIndex + 1 >= path.size() || 
-					path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
-					path.get(currentIndex + 1).rail.railType == RailType.SIDING;
-
-				// Debug information
+				isNextEndOfRoute = currentIndex + 1 >= path.size() || 
+            		path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
+            		path.get(currentIndex + 1).rail.railType == RailType.SIDING;
+					
 				if (currentIndex + 1 < path.size()) {
 					final RailType nextRailType = path.get(currentIndex + 1).rail.railType;
 					if (isNextEndOfRoute) {
@@ -525,8 +524,6 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				} else if (currentIndex + 1 >= path.size()) {
 					System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
 				}
-
-				// First check for special segments
 				if (isNextEndOfRoute) {
 					// Force deceleration for special segments regardless of manual mode
 					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
