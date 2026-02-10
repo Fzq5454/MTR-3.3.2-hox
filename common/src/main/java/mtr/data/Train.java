@@ -494,32 +494,43 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						}
 
 						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
-							startUp(world, trainCars, spacing, isOppositeRail);
+					startUp(world, trainCars, spacing, isOppositeRail);
+				}
+			} else {
+				if (!world.isClientSide()) {
+					final int checkIndex = getIndex(0, spacing, true) + 1;
+					if (isRailBlocked(checkIndex)) {
+						nextStoppingIndex = checkIndex - 1;
+					} else if (nextPlatformIndex > 0 && nextPlatformIndex < path.size()) {
+						nextStoppingIndex = nextPlatformIndex;
+						if (manualNotch < -2) {
+							manualNotch = 0;
 						}
-					} else {
-						if (!world.isClientSide()) {
-							final int checkIndex = getIndex(0, spacing, true) + 1;
-							if (isRailBlocked(checkIndex)) {
-								nextStoppingIndex = checkIndex - 1;
-							} else if (nextPlatformIndex > 0 && nextPlatformIndex < path.size()) {
-								nextStoppingIndex = nextPlatformIndex;
-								if (manualNotch < -2) {
-									manualNotch = 0;
-								}
-							}
-						}
+					}
+				}
 
-						final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
+				final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
 				// Check if the next segment is turn-back rail, siding, or no rail ahead
 				final int currentIndex = getIndex(0, spacing, false);
 				final boolean isNextTurnBackOrSidingOrEnd = currentIndex + 1 >= path.size() || 
 					path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
 					path.get(currentIndex + 1).rail.railType == RailType.SIDING;
 
+				// Debug information
+				if (currentIndex + 1 < path.size()) {
+					final RailType nextRailType = path.get(currentIndex + 1).rail.railType;
+					if (isNextTurnBackOrSidingOrEnd) {
+						System.out.println("[Train Debug] Detected special segment ahead: " + nextRailType.name() + ", current speed: " + speed + ", current index: " + currentIndex);
+					}
+				} else if (currentIndex + 1 >= path.size()) {
+					System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
+				}
+
 				if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
 					if (!isCurrentlyManual) {
 						speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
 						manualNotch = -3;
+						System.out.println("[Train Debug] Normal deceleration activated, new speed: " + speed + ", stopping distance: " + stoppingDistance);
 					}
 					if (isCurrentlyManual) {
 						if (manualNotch >= -2) {
@@ -531,6 +542,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 					// Force deceleration when next segment is turn-back rail, siding, or no rail ahead
 					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
 					manualNotch = -3;
+					System.out.println("[Train Debug] Special segment deceleration activated, new speed: " + speed + ", acceleration: " + (newAcceleration * 2));
 				} else {
 					if (isCurrentlyManual) {
 						if (manualNotch >= -2) {
@@ -542,28 +554,31 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						if (speed < railSpeed) {
 							speed = Math.min(speed + newAcceleration, railSpeed);
 							manualNotch = 2;
+							System.out.println("[Train Debug] Accelerating to rail speed: " + railSpeed + ", new speed: " + speed);
 						} else if (speed > railSpeed) {
 							speed = Math.max(speed - newAcceleration, railSpeed);
 							manualNotch = -2;
+							System.out.println("[Train Debug] Decelerating to rail speed: " + railSpeed + ", new speed: " + speed);
 						} else {
 							manualNotch = 0;
+							System.out.println("[Train Debug] Maintaining rail speed: " + railSpeed);
 						}
 					}
 				}
 
-						tempDoorOpen = transportMode.continuousMovement && openDoors();
-					}
+				tempDoorOpen = transportMode.continuousMovement && openDoors();
+			}
 
-					railProgress += speed * ticksElapsed;
-					if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-						if (!isCurrentlyManual){
-							railProgress = distances.get(nextStoppingIndex);
-							speed = 0;
-							manualNotch = -2;
-						}
-					}
+			railProgress += speed * ticksElapsed;
+			if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
+				if (!isCurrentlyManual){
+					railProgress = distances.get(nextStoppingIndex);
+					speed = 0;
+					manualNotch = -2;
+				}
+			}
 
-					tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
+			tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
 				}
 			}
 
