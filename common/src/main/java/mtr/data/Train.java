@@ -446,7 +446,8 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 			final boolean tempDoorOpen;
 			final float tempDoorValue;
 			final int totalDwellTicks = getTotalDwellTicks();
-			final boolean isNextEndOfRoute;
+			
+			boolean isNextEndOfRoute = false;
 
 			if (!isOnRoute) {
 				railProgress = (railLength + trainCars * spacing) / 2;
