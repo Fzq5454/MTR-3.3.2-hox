@@ -479,14 +479,14 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						if (totalDwellTicks == 0) {
 							tempDoorOpen = false;
 						} else {
-							if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1) {
-								if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
-									railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
-									reversed = !reversed;
-								} else {
-									railProgress = distances.get(repeatIndex1);
-								}
+							if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1 && railProgress < distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
+							if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
+								railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
+								reversed = !reversed;
+							} else {
+								railProgress = distances.get(repeatIndex1);
 							}
+						}
 
 							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
 								elapsedDwellTicks += ticksElapsed;
@@ -525,7 +525,7 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				} else if (currentIndex + 1 >= path.size()) {
 					System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
 				}
-				if (isNextEndOfRoute) {
+				if (isNextEndOfRoute && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
 					// Force deceleration for special segments regardless of manual mode
 					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
 					manualNotch = -3;
