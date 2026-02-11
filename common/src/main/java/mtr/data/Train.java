@@ -453,19 +453,28 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 				tempDoorOpen = false;
 				tempDoorValue = 0;
 
-				if (!isCurrentlyManual && canDeploy(depot)) {
+				if (canDeploy(depot)) {
 					railProgress = (railLength + trainCars * spacing) / 2;
 					reversed = false;
 					speed = 0;
 					nextStoppingIndex = 0;
 					startUp(world, trainCars, spacing, isOppositeRail());
 				}
+
+				// Manual control when not on route
+				if (isCurrentlyManual && manualNotch >= -2) {
+					final float newAcceleration = accelerationConstant * ticksElapsed;
+					final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+					speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
+					railProgress += speed * ticksElapsed;
+				}
+
+				tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
 			} else {
 				final float newAcceleration = accelerationConstant * ticksElapsed;
 
 				if (railProgress >= distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
 					isOnRoute = false;
-					manualNotch = -2;
 					ridingEntities.clear();
 					tempDoorOpen = false;
 					tempDoorValue = 0;
@@ -477,108 +486,107 @@ public abstract class Train extends NameColorDataBase implements IPacket {
 						final boolean railBlocked = isRailBlocked(getIndex(0, spacing, true) + (isOppositeRail ? 2 : 1));
 
 						if (totalDwellTicks == 0) {
-					tempDoorOpen = false;
-				} else {
-					if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1 && railProgress < distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
-						if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
-							railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
-							reversed = !reversed;
+							tempDoorOpen = false;
 						} else {
-							railProgress = distances.get(repeatIndex1);
+							if (elapsedDwellTicks == 0 && isRepeat() && getIndex(railProgress, false) >= repeatIndex2 && distances.size() > repeatIndex1 && railProgress < distances.get(distances.size() - 1) - (railLength - trainCars * spacing) / 2) {
+								if (path.get(repeatIndex2).isOppositeRail(path.get(repeatIndex1))) {
+									railProgress = distances.get(repeatIndex1 - 1) + trainCars * spacing;
+									reversed = !reversed;
+								} else {
+									railProgress = distances.get(repeatIndex1);
+								}
+							}
+
+							if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
+								elapsedDwellTicks += ticksElapsed;
+							}
+
+							tempDoorOpen = openDoors();
 						}
-					}
-
-					if (elapsedDwellTicks < totalDwellTicks - DOOR_MOVE_TIME - DOOR_DELAY - ticksElapsed - 120 || !railBlocked) {
-						elapsedDwellTicks += ticksElapsed;
-					}
-
-					tempDoorOpen = openDoors();
-				}
 
 						if (!world.isClientSide() && (isCurrentlyManual || elapsedDwellTicks >= totalDwellTicks) && !railBlocked && (!isCurrentlyManual || manualNotch > 0)) {
-					startUp(world, trainCars, spacing, isOppositeRail);
-				}
-			} else {
-				if (!world.isClientSide()) {
-					final int checkIndex = getIndex(0, spacing, true) + 1;
-					if (isRailBlocked(checkIndex)) {
-						nextStoppingIndex = checkIndex - 1;
-					} else if (nextPlatformIndex > 0 && nextPlatformIndex < path.size()) {
-						nextStoppingIndex = nextPlatformIndex;
-						if (manualNotch < -2) {
-							manualNotch = 0;
+							startUp(world, trainCars, spacing, isOppositeRail);
+						}
+					} else {
+						if (!world.isClientSide()) {
+						final int checkIndex = getIndex(0, spacing, true) + 1;
+						if (isRailBlocked(checkIndex)) {
+							nextStoppingIndex = checkIndex - 1;
+						} else if (nextPlatformIndex > 0 && nextPlatformIndex < path.size()) {
+							nextStoppingIndex = nextPlatformIndex;
+							if (manualNotch < -2) {
+								manualNotch = 0;
+							}
 						}
 					}
-				}
 
-				final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
-				final int currentIndex = getIndex(0, spacing, false);
-				isNextEndOfRoute = currentIndex + 1 >= path.size() || 
-            		path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
-            		path.get(currentIndex + 1).rail.railType == RailType.SIDING;
+					final double stoppingDistance = distances.get(nextStoppingIndex) - railProgress;
+					final int currentIndex = getIndex(0, spacing, false);
+					isNextEndOfRoute = currentIndex + 1 >= path.size() || 
+					     path.get(currentIndex + 1).rail.railType == RailType.TURN_BACK || 
+					     path.get(currentIndex + 1).rail.railType == RailType.SIDING;
 					
-				if (currentIndex + 1 < path.size()) {
-					final RailType nextRailType = path.get(currentIndex + 1).rail.railType;
-					if (isNextEndOfRoute) {
-						System.out.println("[Train Debug] Detected special segment ahead: " + nextRailType.name() + ", current speed: " + speed + ", current index: " + currentIndex);
+					if (currentIndex + 1 < path.size()) {
+						final RailType nextRailType = path.get(currentIndex + 1).rail.railType;
+						if (isNextEndOfRoute) {
+							System.out.println("[Train Debug] Detected special segment ahead: " + nextRailType.name() + ", current speed: " + speed + ", current index: " + currentIndex);
+						}
+					} else if (currentIndex + 1 >= path.size()) {
+						System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
 					}
-				} else if (currentIndex + 1 >= path.size()) {
-					System.out.println("[Train Debug] Detected end of path ahead, current speed: " + speed + ", current index: " + currentIndex);
-				}
-				if (isNextEndOfRoute && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-					// Force deceleration for special segments regardless of manual mode
-					speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
-					manualNotch = -3;
-					System.out.println("[Train Debug] Special segment deceleration activated, new speed: " + speed + ", acceleration: " + (newAcceleration * 2));
-				} else if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
-					// Normal deceleration for stations
-					if (!isCurrentlyManual) {
-						speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
+					if (isNextEndOfRoute && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
+						// Force deceleration for special segments regardless of manual mode
+						speed = Math.max(speed - newAcceleration * 2, Train.ACCELERATION_DEFAULT);
 						manualNotch = -3;
-						System.out.println("[Train Debug] Normal deceleration activated, new speed: " + speed + ", stopping distance: " + stoppingDistance);
-					} else if (isCurrentlyManual && manualNotch >= -2) {
-						// Manual mode control for stations
-						final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-						speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-					}
-				} else {
-					// Regular speed control
-					if (isCurrentlyManual && manualNotch >= -2) {
-						// Manual mode control
-						final RailType railType = convertMaxManualSpeed(maxManualSpeed);
-						speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
-					} else if (!isCurrentlyManual) {
-						// Automatic mode speed control
-						final float railSpeed = getRailSpeed(getIndex(0, spacing, false));
-						if (speed < railSpeed) {
-							speed = Math.min(speed + newAcceleration, railSpeed);
-							manualNotch = 2;
-							System.out.println("[Train Debug] Accelerating to rail speed: " + railSpeed + ", new speed: " + speed);
-						} else if (speed > railSpeed) {
-							speed = Math.max(speed - newAcceleration, railSpeed);
-							manualNotch = -2;
-							System.out.println("[Train Debug] Decelerating to rail speed: " + railSpeed + ", new speed: " + speed);
-						} else {
-							manualNotch = 0;
-							System.out.println("[Train Debug] Maintaining rail speed: " + railSpeed);
+						System.out.println("[Train Debug] Special segment deceleration activated, new speed: " + speed + ", acceleration: " + (newAcceleration * 2));
+					} else if (!transportMode.continuousMovement && stoppingDistance < 0.5 * speed * speed / accelerationConstant) {
+						// Normal deceleration for stations
+						if (!isCurrentlyManual) {
+							speed = stoppingDistance <= 0 ? Train.ACCELERATION_DEFAULT : (float) Math.max(speed - (0.5 * speed * speed / stoppingDistance) * ticksElapsed, Train.ACCELERATION_DEFAULT);
+							manualNotch = -3;
+							System.out.println("[Train Debug] Normal deceleration activated, new speed: " + speed + ", stopping distance: " + stoppingDistance);
+						} else if (isCurrentlyManual && manualNotch >= -2) {
+							// Manual mode control for stations
+							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
+						}
+					} else {
+						// Regular speed control
+						if (isCurrentlyManual && manualNotch >= -2) {
+							// Manual mode control
+							final RailType railType = convertMaxManualSpeed(maxManualSpeed);
+							speed = Mth.clamp(speed + manualNotch * newAcceleration / 2, 0, railType == null ? RailType.IRON.maxBlocksPerTick : railType.maxBlocksPerTick);
+						} else if (!isCurrentlyManual) {
+							// Automatic mode speed control
+							final float railSpeed = getRailSpeed(getIndex(0, spacing, false));
+							if (speed < railSpeed) {
+								speed = Math.min(speed + newAcceleration, railSpeed);
+								manualNotch = 2;
+								System.out.println("[Train Debug] Accelerating to rail speed: " + railSpeed + ", new speed: " + speed);
+							} else if (speed > railSpeed) {
+								speed = Math.max(speed - newAcceleration, railSpeed);
+								manualNotch = -2;
+								System.out.println("[Train Debug] Decelerating to rail speed: " + railSpeed + ", new speed: " + speed);
+							} else {
+								manualNotch = 0;
+								System.out.println("[Train Debug] Maintaining rail speed: " + railSpeed);
+							}
 						}
 					}
+
+					tempDoorOpen = transportMode.continuousMovement && openDoors();
 				}
 
-				tempDoorOpen = transportMode.continuousMovement && openDoors();
-			}
-
-			railProgress += speed * ticksElapsed;
-			if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
-				if (!isCurrentlyManual || isNextEndOfRoute){
-					railProgress = distances.get(nextStoppingIndex);
-					speed = 0;
-					manualNotch = -2;
+				railProgress += speed * ticksElapsed;
+				if (!transportMode.continuousMovement && railProgress > distances.get(nextStoppingIndex)) {
+					if (!isCurrentlyManual || isNextEndOfRoute){
+						railProgress = distances.get(nextStoppingIndex);
+						speed = 0;
+						manualNotch = -2;
+					}
 				}
-			}
 
-			tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
-				}
+				tempDoorValue = Mth.clamp(doorValue + ticksElapsed * (doorTarget ? 1 : -1) / DOOR_MOVE_TIME, 0, 1);
 			}
 
 			doorTarget = tempDoorOpen;
